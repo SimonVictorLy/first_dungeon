@@ -1,6 +1,7 @@
 #ifndef _LTexture_H
 #define _LTexture_H
 
+// this class just hold the value of the image loaded
 class LTexture
 {
   public:

@@ -33,7 +33,6 @@ const int TILE_WIDTH = 80;
 const int TILE_HEIGHT = 80;
 const int TOTAL_TILES = 192;
 const int TOTAL_TILE_SPRITES = 16;
-const int ANIMATION_FRAMES = 4;
 
 //The different tile sprites
 enum TileTypes{
@@ -64,5 +63,4 @@ extern LTexture gTileTexture;  // tiles for floors and walls
 extern LTexture gCustomTexture; // Custom tile Texture
 extern LTexture gPersonTexture; // person
 
-extern SDL_Rect gSpriteClips[ANIMATION_FRAMES];
 extern SDL_Rect gTileClips[TOTAL_TILE_SPRITES];

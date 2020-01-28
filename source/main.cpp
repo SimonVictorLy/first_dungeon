@@ -9,7 +9,6 @@ LTexture gTileTexture;  // tiles for floors and walls
 LTexture gCustomTexture; // Custom tile Texture
 LTexture gPersonTexture; // person
 
-SDL_Rect gSpriteClips[ANIMATION_FRAMES];
 SDL_Rect gTileClips[TOTAL_TILE_SPRITES];
 
 bool init(){
@@ -21,7 +20,7 @@ bool init(){
     printf("Warning: Linear Texture Filtering not enabled");
   }
 
-  gWindow = SDL_CreateWindow("Hip-hop Showdown", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+  gWindow = SDL_CreateWindow("Dungeon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
   if(gWindow == NULL){printf("Window Error: %s\n",SDL_GetError()); return false;}
   
   gRenderer = SDL_CreateRenderer(gWindow,-1,SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -54,31 +53,10 @@ bool loadMedia(Tile* tiles[]){
 	if( !gPersonTexture.loadFromFile( "../imgs/char_fighter128x192.png"))
   {printf( "Failed to load Person texture!\n" ); return false;}
   
-  gSpriteClips[0].x = 0;
-  gSpriteClips[0].y = 32;
-  gSpriteClips[0].w = 32;
-  gSpriteClips[0].h = 32;
-
-  gSpriteClips[1].x = 32;
-  gSpriteClips[1].y = 32;
-  gSpriteClips[1].w = 32;
-  gSpriteClips[1].h = 32;
-
-  gSpriteClips[2].x = 64;
-  gSpriteClips[2].y = 32;
-  gSpriteClips[2].w = 32;
-  gSpriteClips[2].h = 32;
-
-  gSpriteClips[3].x = 96;
-  gSpriteClips[3].y = 32;
-  gSpriteClips[3].w = 32;
-  gSpriteClips[3].h = 32;
-
 	//Load tile map
 	if( !setTiles( tiles ) )
   {printf( "Failed to load tile set!\n" ); return false;}
  
-
 	return true;
 }
 
@@ -267,6 +245,7 @@ int checkBackground(SDL_Rect box, Tile* tiles[]){
   int centerY = box.y + box.h/2;
 
   // at this point you don't even need the check collision code
+  // because we can do it by math of x,y
   if(centerX >= 0 && centerY >=0 && centerX < LEVEL_WIDTH && centerY < LEVEL_HEIGHT){
       int k = centerX/TILE_WIDTH + tilesPerRow*(centerY/TILE_HEIGHT);
       return tiles[k]->getType();
@@ -327,7 +306,14 @@ int main( int argc, char* args[]){
   SDL_Event e;
   
   // Entities
-  Entity dot;
+  Entity character(0,0,32,32,&gPersonTexture,0,0);
+  
+  Entity **enemies = new Entity*[5];
+  
+  for(int i = 0; i < 5;i++){
+    enemies[i] = new Entity(TILE_WIDTH*((i+1)*2),TILE_HEIGHT*10,32,32,&gPersonTexture,0,0);
+  }
+
   SDL_Rect camera = {0,0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
   while(!quit){
@@ -337,17 +323,26 @@ int main( int argc, char* args[]){
       // Close button on window was pressed
       if(e.type == SDL_QUIT)quit = true;
       // Entities effected by events
-      dot.handleEvent(e);
+      character.handleEvent(e);
     }
+    character.move(tileSet);
 
-    dot.move(tileSet);
-    dot.setCamera(camera);
+    //character.setCamera(camera);
+    
+    // set background as white 
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF,0xFF,0xFF);
     SDL_RenderClear(gRenderer);
+
     for(int i = 0; i < TOTAL_TILES; ++i){
       tileSet[i]->render(camera);
     }
-    dot.render(camera);
+
+    character.render(camera, true);
+    for(int i = 0; i < 5; ++i){
+      enemies[i]->move(tileSet);
+      enemies[i]->render(camera, false);
+    }
+
     SDL_RenderPresent(gRenderer);
   }
   close(tileSet);
